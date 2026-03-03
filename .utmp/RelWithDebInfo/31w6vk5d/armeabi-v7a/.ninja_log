@@ -1,0 +1,21 @@
+# ninja log v5
+46	203	7456820253073612	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	376baea354a0457e
+0	1360	7456820264615311	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	c0450740f6ef6e89
+15	925	7456820260226334	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	7954e6046c46a7f
+205	428	7456820254763336	C:/Users/yasin/Documents/GitHub/Tap-and-Fly/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/31w6vk5d/obj/armeabi-v7a/libswappywrapper.so	b184eaae49f2f4a8
+32	927	7456820260238851	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	a9d0956be816855b
+6	1130	7456820262293564	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	84116f9d1a8de44
+20	963	7456820260659725	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	7d4724f5c421dd3b
+39	1084	7456820261867799	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	bbcb5ec016bd87c8
+26	1299	7456820264027458	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	50602d6b27f95ff7
+1360	1501	7456820265646119	C:/Users/yasin/Documents/GitHub/Tap-and-Fly/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/31w6vk5d/obj/armeabi-v7a/libgame.so	6dfdfafc5cd69232
+49	192	7456967841880306	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	376baea354a0457e
+193	412	7456967843510285	C:/Users/yasin/Documents/GitHub/Tap-and-Fly/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/31w6vk5d/obj/armeabi-v7a/libswappywrapper.so	b184eaae49f2f4a8
+36	903	7456967848857490	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	a9d0956be816855b
+14	905	7456967848897018	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	7954e6046c46a7f
+29	985	7456967849761595	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	7d4724f5c421dd3b
+42	1058	7456967850510365	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	bbcb5ec016bd87c8
+9	1102	7456967850886648	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	84116f9d1a8de44
+22	1269	7456967852615070	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	50602d6b27f95ff7
+3	1346	7456967853359154	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	c0450740f6ef6e89
+1346	1492	7456967854488782	C:/Users/yasin/Documents/GitHub/Tap-and-Fly/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/31w6vk5d/obj/armeabi-v7a/libgame.so	6dfdfafc5cd69232

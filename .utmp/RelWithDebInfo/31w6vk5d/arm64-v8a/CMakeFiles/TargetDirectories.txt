@@ -1,0 +1,8 @@
+C:/Users/yasin/Documents/GitHub/Tap-and-Fly/.utmp/RelWithDebInfo/31w6vk5d/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/yasin/Documents/GitHub/Tap-and-Fly/.utmp/RelWithDebInfo/31w6vk5d/arm64-v8a/CMakeFiles/rebuild_cache.dir
+C:/Users/yasin/Documents/GitHub/Tap-and-Fly/.utmp/RelWithDebInfo/31w6vk5d/arm64-v8a/GameActivity/CMakeFiles/game.dir
+C:/Users/yasin/Documents/GitHub/Tap-and-Fly/.utmp/RelWithDebInfo/31w6vk5d/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+C:/Users/yasin/Documents/GitHub/Tap-and-Fly/.utmp/RelWithDebInfo/31w6vk5d/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir
+C:/Users/yasin/Documents/GitHub/Tap-and-Fly/.utmp/RelWithDebInfo/31w6vk5d/arm64-v8a/FramePacing/CMakeFiles/swappywrapper.dir
+C:/Users/yasin/Documents/GitHub/Tap-and-Fly/.utmp/RelWithDebInfo/31w6vk5d/arm64-v8a/FramePacing/CMakeFiles/edit_cache.dir
+C:/Users/yasin/Documents/GitHub/Tap-and-Fly/.utmp/RelWithDebInfo/31w6vk5d/arm64-v8a/FramePacing/CMakeFiles/rebuild_cache.dir
