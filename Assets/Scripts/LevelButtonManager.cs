@@ -1,29 +1,88 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class LevelButtonManager : MonoBehaviour
 {
-    public Button[] levelButtons; // Dizideki her düðme, bir seviye butonunu temsil eder.
-    public int lastPlayedLevel = 0;
+    [Header("Level Generation Settings")]
+    [Tooltip("Ornek bir Slot prefabini buraya surukle")]
+    public GameObject buttonPrefab; 
+    
+    [Tooltip("Butonlarin eklenecegi UI Paneli")]
+    public Transform contentPanel; 
+    
+    public int totalLevels = 50;
+
+    [Header("Scene Target")]
+    [Tooltip("Bolume tiklandiginda acilacak tek ana sahnenin adi")]
+    public string gameSceneName = "1";
 
     void Start()
     {
-        // Oyuncunun son oynadýðý seviyeyi al
-        lastPlayedLevel = GameManager.Instance.GetCurrentLevel();
-
-        // Seviye butonlarýný döngüye alarak durumlarýný ayarla
-        for (int i = 0; i < levelButtons.Length; i++)
+        int lastPlayedLevel = 1;
+        if (GameManager.Instance != null)
         {
-            // Eðer butonun indeksi son oynadýðý seviyeden küçük veya eþitse, butonu etkinleþtir
-            if (i + 1 <= lastPlayedLevel)
+            lastPlayedLevel = GameManager.Instance.GetCurrentLevel();
+        }
+
+        for (int i = 1; i <= totalLevels; i++)
+        {
+            GameObject newButton = Instantiate(buttonPrefab, contentPanel);
+            newButton.name = "Slot_Level_" + i;
+
+            TMP_Text buttonTextTMP = newButton.GetComponentInChildren<TMP_Text>();
+            if (buttonTextTMP != null)
             {
-                levelButtons[i].interactable = true;
+                buttonTextTMP.text = i.ToString();
             }
-            // Sonraki seviyeleri kilitli hale getir
             else
             {
-                levelButtons[i].interactable = false;
+                Text buttonTextLegacy = newButton.GetComponentInChildren<Text>();
+                if (buttonTextLegacy != null) buttonTextLegacy.text = i.ToString();
+            }
+
+            Button btn = newButton.GetComponent<Button>();
+            if (btn != null)
+            {
+                if (i <= lastPlayedLevel)
+                {
+                    btn.interactable = true;
+                    int levelIndex = i; // Lambda iÃ§in yerel kopyalama
+                    btn.onClick.AddListener(() => OnLevelButtonClicked(levelIndex));
+                    
+                    // AÃ§Ä±k levele normal renkler ver
+                    SetButtonColor(newButton, Color.white);
+                }
+                else
+                {
+                    btn.interactable = false;
+                    // Kilitli levelleri gri renge boya
+                    SetButtonColor(newButton, new Color(0.4f, 0.4f, 0.4f, 1f));
+                }
             }
         }
+    }
+
+    private void SetButtonColor(GameObject buttonObj, Color colorToSet)
+    {
+        // Butonun iÃ§indeki tÃ¼m gÃ¶rsel bileÅŸenleri (Image) bul ve rengini deÄŸiÅŸtir
+        Image[] images = buttonObj.GetComponentsInChildren<Image>();
+        foreach (Image img in images)
+        {
+            // KullanÄ±cÄ±nÄ±n Prefab'da ayarladÄ±ÄŸÄ± transparanlÄ±k (Alpha) deÄŸerini bozma!
+            colorToSet.a = img.color.a; 
+            img.color = colorToSet;
+        }
+    }
+
+    private void OnLevelButtonClicked(int levelIndex)
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetCurrentLevel(levelIndex);
+        }
+        
+        SceneManager.LoadScene(gameSceneName);
     }
 }

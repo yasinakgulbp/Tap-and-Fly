@@ -1,0 +1,12 @@
+# ninja log v5
+99	528	7943127043585589	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	f5bda08a41003afb
+539	1103	7943127047986390	D:/GitHub/Tap-and-Fly/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/o114i645/obj/armeabi-v7a/libswappywrapper.so	e4514ff9abaed6a1
+26	2233	7943127060567948	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	e914aefdc6fbb844
+38	2331	7943127061421718	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	282e4977dcc8037e
+1	2341	7943127061658597	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	4e90bbf185d8a62d
+81	2390	7943127062257144	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	f5376f2eede63b5a
+17	2454	7943127062942953	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	818073ed6b885c37
+65	2529	7943127063672624	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	f7f9256d6358b424
+50	2687	7943127065259292	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	8c8062e572dc83fc
+9	2793	7943127066253860	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	5b1f259dc7afdfc8
+2794	2921	7943127067670721	D:/GitHub/Tap-and-Fly/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/o114i645/obj/armeabi-v7a/libgame.so	aaa6d3550748036e

@@ -7,31 +7,43 @@ public class Counter : MonoBehaviour
     private int failedMoves = 0;
     private int remainingObjects = 0;
     public int maxFailedMoves = 3; // Hata yapma limiti
-    public float secondsPerCube = 1f; // Her küp için 1 saniye
+    public float secondsPerCube = 1f; // Her kÃ¼p iÃ§in 1 saniye
 
-    // TMPro text nesneleri için referanslar
+    // TMPro text nesneleri iÃ§in referanslar
     public TMP_Text failedMovesText;
     public TMP_Text remainingObjectsText;
     public TMP_Text timerText;
+    public TMP_Text levelText; // Oyun ekranÄ±nda kaÃ§Ä±ncÄ± levelde olduÄŸumuzu gÃ¶sterecek metin
 
     private float currentTime;
 
     private void Start()
     {
         currentTime = GetInitialTime();
-        // Başlangıçta bir gecikme ekleyerek obje sayısını al
+        // BaÅŸlangÄ±Ã§ta bir gecikme ekleyerek obje sayÄ±sÄ±nÄ± al
         Invoke("GetRemainingObjects", 0.2f);
+
+        // UI'da level yazÄ±sÄ±nÄ± gÃ¼ncelle
+        if (levelText != null && GameManager.Instance != null)
+        {
+            levelText.text = "Level: " + GameManager.Instance.GetCurrentLevel().ToString();
+        }
     }
 
     private float GetInitialTime()
     {
-        // MazeGenerator scriptine erişimi al
         MazeGenerator mazeGenerator = Object.FindFirstObjectByType<MazeGenerator>();
         if (mazeGenerator != null)
         {
-            // MazeGenerator'dan obje sayısını al
             remainingObjects = mazeGenerator.GetObjectCount();
-            // Geri sayım süresini küp sayısına göre hesapla
+            
+            if (GameManager.Instance != null)
+            {
+                int level = GameManager.Instance.GetCurrentLevel();
+                int dummy; 
+                GameManager.Instance.GetLevelSettings(level, out dummy, out dummy, out dummy, out dummy, out secondsPerCube);
+            }
+
             return remainingObjects * secondsPerCube;
         }
         else
@@ -43,13 +55,13 @@ public class Counter : MonoBehaviour
 
     private void GetRemainingObjects()
     {
-        // MazeGenerator scriptine erişimi al
+        // MazeGenerator scriptine eriÅŸimi al
         MazeGenerator mazeGenerator = Object.FindFirstObjectByType<MazeGenerator>();
         if (mazeGenerator != null)
         {
-            // MazeGenerator'dan obje sayısını al ve kalan obje sayısını güncelle
+            // MazeGenerator'dan obje sayÄ±sÄ±nÄ± al ve kalan obje sayÄ±sÄ±nÄ± gÃ¼ncelle
             remainingObjects = mazeGenerator.GetObjectCount();
-            // Başlangıçta metinleri güncelle
+            // BaÅŸlangÄ±Ã§ta metinleri gÃ¼ncelle
             UpdateTexts();
         }
         else
@@ -60,9 +72,9 @@ public class Counter : MonoBehaviour
 
     public void IncrementSuccessfulMoves()
     {
-        // Kalan obje sayısını azalt
+        // Kalan obje sayÄ±sÄ±nÄ± azalt
         remainingObjects--;
-        // Başarılı hareket sayısını güncelle ve metni yenile
+        // BaÅŸarÄ±lÄ± hareket sayÄ±sÄ±nÄ± gÃ¼ncelle ve metni yenile
         UpdateTexts();
 
         // Oyun bitti mi kontrol et
@@ -72,7 +84,7 @@ public class Counter : MonoBehaviour
     public void IncrementFailedMoves()
     {
         failedMoves++;
-        // Başarısız hareket sayısını güncelle ve metni yenile
+        // BaÅŸarÄ±sÄ±z hareket sayÄ±sÄ±nÄ± gÃ¼ncelle ve metni yenile
         UpdateTexts();
 
         // Hata yapma limitini kontrol et
@@ -86,23 +98,23 @@ public class Counter : MonoBehaviour
 
         if (currentTime <= 0)
         {
-            // Süre bittiğinde oyunu yeniden başlat
+            // SÃ¼re bittiÄŸinde oyunu yeniden baÅŸlat
             RestartScene();
         }
 
-        // Geri sayımın son 5 saniyesinde uyarı mesajı göster
+        // Geri sayÄ±mÄ±n son 5 saniyesinde uyarÄ± mesajÄ± gÃ¶ster
         if (currentTime <= 5f)
         {
-            timerText.color = Color.red;
+             timerText.color = Color.red;
         }
     }
 
-    // TextMesh Pro nesnelerini güncelleyen yardımcı fonksiyon
+    // TextMesh Pro nesnelerini gÃ¼ncelleyen yardÄ±mcÄ± fonksiyon
     private void UpdateTexts()
     {
         if (failedMovesText != null)
         {
-            failedMovesText.text = (maxFailedMoves - failedMoves).ToString(); // Kalan hak sayısını göster
+            failedMovesText.text = (maxFailedMoves - failedMoves).ToString(); // Kalan hak sayÄ±sÄ±nÄ± gÃ¶ster
         }
 
         if (remainingObjectsText != null)
@@ -111,13 +123,13 @@ public class Counter : MonoBehaviour
         }
     }
 
-    // Oyunun bitip bitmediğini kontrol eden fonksiyon
+    // Oyunun bitip bitmediÄŸini kontrol eden fonksiyon
     private void CheckGameEnd()
     {
         if (remainingObjects <= 0)
         {
-            Debug.Log("Zafer!"); // Zafer durumunu konsola yazdır
-            // Bir sonraki seviyeye geç
+            Debug.Log("Zafer!"); // Zafer durumunu konsola yazdÄ±r
+            // Bir sonraki seviyeye geÃ§
             GoToNextLevel();
         }
     }
@@ -125,38 +137,31 @@ public class Counter : MonoBehaviour
     // Hata yapma limitini kontrol eden fonksiyon
     private void CheckFailureLimit()
     {
-        if (maxFailedMoves - failedMoves == 0) // Kalan hak sıfıra eşit ise
+        if (maxFailedMoves - failedMoves == 0) // Kalan hak sÄ±fÄ±ra eÅŸit ise
         {
-            Debug.Log("Mağlubiyet!"); // Mağlubiyet durumunu konsola yazdır
-                                      // Sahneyi yeniden başlat
+            Debug.Log("Malubiyet!"); // Malubiyet durumunu konsola yazdÄ±r
+                                      // Sahneyi yeniden baÅŸlat
             RestartScene();
         }
     }
 
-    // Sahneyi yeniden başlatan fonksiyon
+    // Sahneyi yeniden baÅŸlatan fonksiyon
     private void RestartScene()
     {
         Scene currentScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(currentScene.buildIndex);
     }
 
-    // Bir sonraki seviyeye geçen fonksiyon
+    // Bir sonraki seviyeye geÃ§en fonksiyon
     private void GoToNextLevel()
     {
-        // Aktif sahnenin bir sonraki build index'ini al
-        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+        if (GameManager.Instance != null)
+        {
+            int currentLevel = GameManager.Instance.GetCurrentLevel();
+            GameManager.Instance.SetCurrentLevel(currentLevel + 1);
+            Debug.Log("Yeni Seviyeye Geciliyor: " + (currentLevel + 1));
+        }
 
-        // Eğer bir sonraki sahne mevcutsa, o seviyeye geç
-        if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
-        {
-            Debug.Log("Sonraki geçilmek için gönderilen level : " + nextSceneIndex);
-            GameManager.Instance.SetCurrentLevel(nextSceneIndex);
-            SceneManager.LoadScene(nextSceneIndex);
-        }
-        else
-        {
-            Debug.LogWarning("There is no next level available!");
-            RestartScene();
-        }
+        RestartScene();
     }
 }

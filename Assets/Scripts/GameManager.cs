@@ -110,5 +110,23 @@ public class GameManager : MonoBehaviour
     {
         return maxFailedMoves;
     }
+
+    public void GetLevelSettings(int level, out int width, out int height, out int depth, out int removeCount, out float timePerCube)
+    {
+        // Zorluk eğrisi: her 12 seviyede bir grid boyutu 1 artar. (2x2x2'den başlar)
+        int size = 2 + (level / 12); 
+        if (size > 5) size = 5; // Maksimum 5x5x5
+        
+        if (level <= 1) size = 2; // Level 1 her zaman 2x2x2
+
+        width = size;
+        height = size;
+        depth = size;
+
+        removeCount = size * 2; // Kaldırılacak küp sayısı
+        
+        // Zaman hesaplaması: Seviye arttıkça her küp için ayrılan saniye azalır.
+        timePerCube = Mathf.Max(0.5f, 2.0f - (level * 0.03f));
+    }
     #endregion
 }

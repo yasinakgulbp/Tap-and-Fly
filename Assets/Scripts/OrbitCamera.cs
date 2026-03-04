@@ -1,42 +1,67 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class OrbitCamera : MonoBehaviour
 {
-    public Transform target; // Dönme merkezini belirleyen transform
+    public Transform target; // DÃ¶nme merkezini belirleyen transform
     public float sensitivity = 10f; // Fare hassasiyeti
-    public float distance = 10f; // Kameranın hedeften uzaklığı
-    public float zoomSpeed = 2f; // Yakınlaştırma ve uzaklaştırma hızı
-    public float minDistance = 2f; // Minimum uzaklık
-    public float maxDistance = 20f; // Maksimum uzaklık
+    public float distance = 10f; // KameranÄ±n hedeften uzaklÄ±ÄŸÄ±
+    public float zoomSpeed = 2f; // YakÄ±nlaÅŸtÄ±rma ve uzaklaÅŸtÄ±rma hÄ±zÄ±
+    public float minDistance = 2f; // Minimum uzaklÄ±k
+    public float maxDistance = 20f; // Maksimum uzaklÄ±k
 
     private float _rotationX;
     private float _rotationY;
 
     void Start()
     {
+        // Dinamik Kamera Mesafesi: Level bilgisini alÄ±p blok boyutuna gÃ¶re uzaklÄ±ÄŸÄ± hesapla
+        if (GameManager.Instance != null)
+        {
+            int level = GameManager.Instance.GetCurrentLevel();
+            int width, height, depth, dummyRot;
+            float dummyTime;
+            GameManager.Instance.GetLevelSettings(level, out width, out height, out depth, out dummyRot, out dummyTime);
+            
+            // EÄŸer blok bÃ¼yÃ¼kse (Ã¶rn: 3x3x3 -> ~10 distance, 5x5x5 -> ~18 distance)
+            // Ortama gÃ¶re base bir sabit sayÄ± belirleyebiliriz:
+            distance = 5f + (width * 2f); 
+
+            // Kamera merkezini (target) bloÄŸun tam geometrik merkezine ayarla:
+            if (target != null)
+            {
+                float centerX = (width - 1) / 2f;
+                float centerY = (height - 1) / 2f;
+                float centerZ = (depth - 1) / 2f;
+                target.position = new Vector3(centerX, centerY, centerZ);
+            }
+        }
+
         Vector3 relativePos = target.position - transform.position;
-        Quaternion rotation = Quaternion.LookRotation(relativePos);
-        _rotationY = rotation.eulerAngles.y;
-        _rotationX = rotation.eulerAngles.x;
+        if (relativePos != Vector3.zero)
+        {
+            Quaternion rotation = Quaternion.LookRotation(relativePos);
+            _rotationY = rotation.eulerAngles.y;
+            _rotationX = rotation.eulerAngles.x;
+        }
     }
 
     void Update()
     {
-        // Fare hareketinin yatay ve dikey bileşenlerini al
+        // Fare hareketinin yatay ve dikey bileÅŸenlerini al
         float mouseHorizontalInput = Input.GetAxis("Mouse X");
         float mouseVerticalInput = Input.GetAxis("Mouse Y");
 
-        // Yatay ve dikey dönüş açılarını hesapla
+        // Yatay ve dikey dÃ¶nÃ¼ÅŸ aÃ§Ä±larÄ±nÄ± hesapla
         _rotationY += mouseHorizontalInput * sensitivity;
         _rotationX -= mouseVerticalInput * sensitivity;
 
-        // Dikey dönüş açısını sınırla (-90 ile 90 derece arasında)
+        // Dikey dÃ¶nÃ¼ÅŸ aÃ§Ä±sÄ±nÄ± sÄ±nÄ±rla (-90 ile 90 derece arasÄ±nda)
         _rotationX = Mathf.Clamp(_rotationX, -90f, 90f);
 
-        // Kamerayı yatay ve dikey eksende döndür
+        // KamerayÄ± yatay ve dikey eksende dÃ¶ndÃ¼r
         transform.rotation = Quaternion.Euler(_rotationX, _rotationY, 0f);
 
-        // Yakınlaştırma ve uzaklaştırmayı gerçekleştir
+        // YakÄ±nlaÅŸtÄ±rma ve uzaklaÅŸtÄ±rmayÄ± gerÃ§ekleÅŸtir
         float pinchAmount = 0;
         if (Input.touchCount == 2)
         {
@@ -52,11 +77,11 @@ public class OrbitCamera : MonoBehaviour
             pinchAmount = prevTouchDeltaMag - touchDeltaMag;
         }
 
-        // Kamerayı zoomSpeed oranında yakınlaştır veya uzaklaştır
+        // KamerayÄ± zoomSpeed oranÄ±nda yakÄ±nlaÅŸtÄ±r veya uzaklaÅŸtÄ±r
         distance += pinchAmount * zoomSpeed * Time.deltaTime;
         distance = Mathf.Clamp(distance, minDistance, maxDistance);
 
-        // Kamerayı objenin etrafında konumlandır
+        // KamerayÄ± objenin etrafÄ±nda konumlandÄ±r
         transform.position = target.position - transform.forward * distance;
     }
 }
@@ -81,9 +106,9 @@ public class OrbitCamera : MonoBehaviour
 
 //public class OrbitCamera : MonoBehaviour
 //{
-//    public Transform target; // Dönme merkezini belirleyen transform
+//    public Transform target; // DÃ¶nme merkezini belirleyen transform
 //    public float sensitivity = 10f; // Fare hassasiyeti
-//    public float distance = 10f; // Kameranın hedeften uzaklığı
+//    public float distance = 10f; // KameranÄ±n hedeften uzaklÄ±ÄŸÄ±
 
 //    private float _rotationX;
 //    private float _rotationY;
@@ -98,21 +123,21 @@ public class OrbitCamera : MonoBehaviour
 
 //    void Update()
 //    {
-//        // Fare hareketinin yatay ve dikey bileşenlerini al
+//        // Fare hareketinin yatay ve dikey bileÅŸenlerini al
 //        float mouseHorizontalInput = Input.GetAxis("Mouse X");
 //        float mouseVerticalInput = Input.GetAxis("Mouse Y");
 
-//        // Yatay ve dikey dönüş açılarını hesapla
+//        // Yatay ve dikey dÃ¶nÃ¼ÅŸ aÃ§Ä±larÄ±nÄ± hesapla
 //        _rotationY += mouseHorizontalInput * sensitivity;
 //        _rotationX -= mouseVerticalInput * sensitivity;
 
-//        // Dikey dönüş açısını sınırla (-90 ile 90 derece arasında)
+//        // Dikey dÃ¶nÃ¼ÅŸ aÃ§Ä±sÄ±nÄ± sÄ±nÄ±rla (-90 ile 90 derece arasÄ±nda)
 //        _rotationX = Mathf.Clamp(_rotationX, -90f, 90f);
 
-//        // Kamerayı yatay ve dikey eksende döndür
+//        // KamerayÄ± yatay ve dikey eksende dÃ¶ndÃ¼r
 //        transform.rotation = Quaternion.Euler(_rotationX, _rotationY, 0f);
 
-//        // Kamerayı objenin etrafında konumlandır
+//        // KamerayÄ± objenin etrafÄ±nda konumlandÄ±r
 //        transform.position = target.position - transform.forward * distance;
 //    }
 //}

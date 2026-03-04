@@ -2,23 +2,33 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class MazeGenerator : MonoBehaviour
+public class MazeGenerator : MonoBehaviour        
 {
     public GameObject[] cubePrefabs1;
     public GameObject[] cubePrefabs2;
     public GameObject targetObject; // Target objeyi buraya ata
-    public int mazeWidth = 10;
-    public int mazeHeight = 10;
-    public int mazeDepth = 10;
+    
+    [Header("Block Dimensions")]
+    public int mazeWidth = 3;
+    public int mazeHeight = 3;
+    public int mazeDepth = 3;
 
-    public int removeRandomObjects = 10;
+    [Header("Difficulty")]
+    public int removeRandomObjects = 5;
 
     private GameObject[] selectedCubePrefabs;
-    private int[,,] maze;
     private List<GameObject> mazeObjects = new List<GameObject>(); // Tüm objeleri tutmak için bir dizi
 
     void Start()
     {
+        // GameManager'dan aktif seviyenin ayarlarını çek
+        if (GameManager.Instance != null)
+        {
+            int currentLevel = GameManager.Instance.GetCurrentLevel();
+            float unusedTime; // Counter.cs tarafından kullanılacak
+            GameManager.Instance.GetLevelSettings(currentLevel, out mazeWidth, out mazeHeight, out mazeDepth, out removeRandomObjects, out unusedTime);
+        }
+
         // Rastgele bir dizi seç
         if (Random.Range(0, 2) == 0)
         {
@@ -29,128 +39,164 @@ public class MazeGenerator : MonoBehaviour
             selectedCubePrefabs = cubePrefabs2;
         }
 
-        maze = new int[mazeWidth, mazeHeight, mazeDepth];
-        GenerateMaze();
-        BuildMaze();
-
+        GenerateSolvableBlock();
         GetObjectCount();
-
-        // Sahneye eklenen objelerden 5 tanesini rastgele sil
-        RemoveRandomObjects(removeRandomObjects);
     }
 
-    void GenerateMaze()
+    void GenerateSolvableBlock()
     {
-        // Use a (modified) recursive backtracker algorithm for maze generation
-        Stack<Vector3Int> cellStack = new Stack<Vector3Int>();
-        Vector3Int currentCell = new Vector3Int(Random.Range(0, mazeWidth), Random.Range(0, mazeHeight), Random.Range(0, mazeDepth));
-
-        while (true)
+        GameObject target = null;
+        if(targetObject != null)
         {
-            maze[currentCell.x, currentCell.y, currentCell.z] = 1;  // Mark as visited
-            List<Vector3Int> unvisitedNeighbors = GetUnvisitedNeighbors(currentCell);
+            target = Instantiate(targetObject, Vector3.zero, Quaternion.identity);
+        }
 
-            if (unvisitedNeighbors.Count > 0)
+        // 1. Izgarayı oluştur ve rastgele küpleri eksilt
+        bool[,,] grid = new bool[mazeWidth, mazeHeight, mazeDepth];
+        for (int x = 0; x < mazeWidth; x++)
+            for (int y = 0; y < mazeHeight; y++)
+                for (int z = 0; z < mazeDepth; z++)
+                    grid[x, y, z] = true;
+
+        int totalPeeled = 0;
+        int maxToRemove = Mathf.Min(removeRandomObjects, mazeWidth * mazeHeight * mazeDepth - 1);
+        while (totalPeeled < maxToRemove)
+        {
+            int rx = Random.Range(0, mazeWidth);
+            int ry = Random.Range(0, mazeHeight);
+            int rz = Random.Range(0, mazeDepth);
+            if (grid[rx, ry, rz])
             {
-                Vector3Int nextCell = unvisitedNeighbors[Random.Range(0, unvisitedNeighbors.Count)];
-                RemoveWallBetween(currentCell, nextCell);
-                cellStack.Push(currentCell);
-                currentCell = nextCell;
-            }
-            else if (cellStack.Count > 0)
-            {
-                currentCell = cellStack.Pop();
-            }
-            else
-            {
-                break; // Maze is complete
+                grid[rx, ry, rz] = false;
+                totalPeeled++;
             }
         }
-    }
 
-    List<Vector3Int> GetUnvisitedNeighbors(Vector3Int cell)
-    {
-        List<Vector3Int> neighbors = new List<Vector3Int>();
+        // 2. Geriye Doğru Soyma Algoritması
+        Vector3[,,] escapeDirections = new Vector3[mazeWidth, mazeHeight, mazeDepth];
+        int remainingCubes = (mazeWidth * mazeHeight * mazeDepth) - totalPeeled;
+        int failSafe = 10000;
 
-        // Check all potential neighbors in each direction
-        if (cell.x > 0 && maze[cell.x - 1, cell.y, cell.z] == 0) neighbors.Add(new Vector3Int(cell.x - 1, cell.y, cell.z));
-        if (cell.x < mazeWidth - 1 && maze[cell.x + 1, cell.y, cell.z] == 0) neighbors.Add(new Vector3Int(cell.x + 1, cell.y, cell.z));
-        if (cell.y > 0 && maze[cell.x, cell.y - 1, cell.z] == 0) neighbors.Add(new Vector3Int(cell.x, cell.y - 1, cell.z));
-        if (cell.y < mazeHeight - 1 && maze[cell.x, cell.y + 1, cell.z] == 0) neighbors.Add(new Vector3Int(cell.x, cell.y + 1, cell.z));
-        if (cell.z > 0 && maze[cell.x, cell.y, cell.z - 1] == 0) neighbors.Add(new Vector3Int(cell.x, cell.y, cell.z - 1));
-        if (cell.z < mazeDepth - 1 && maze[cell.x, cell.y, cell.z + 1] == 0) neighbors.Add(new Vector3Int(cell.x, cell.y, cell.z + 1));
+        while (remainingCubes > 0 && failSafe > 0)
+        {
+            failSafe--;
+            List<Vector3Int> candidates = new List<Vector3Int>();
+            List<List<Vector3>> candidateDirs = new List<List<Vector3>>();
 
-        return neighbors;
-    }
+            // Kaçabilecek tüm küpleri bul
+            for (int x = 0; x < mazeWidth; x++)
+            {
+                for (int y = 0; y < mazeHeight; y++)
+                {
+                    for (int z = 0; z < mazeDepth; z++)
+                    {
+                        if (grid[x, y, z])
+                        {
+                            List<Vector3> freeDirs = GetFreeDirections(grid, x, y, z);
+                            if (freeDirs.Count > 0)
+                            {
+                                candidates.Add(new Vector3Int(x, y, z));
+                                candidateDirs.Add(freeDirs);
+                            }
+                        }
+                    }
+                }
+            }
 
-    void RemoveWallBetween(Vector3Int cell1, Vector3Int cell2)
-    {
-        // (Assume walls exist between all neighbor cells)
-        // You'll need to adjust based on your wall placement logic
-    }
+            if (candidates.Count == 0)
+            {
+                Debug.LogWarning("Generation Deadlock! Remaining: " + remainingCubes);
+                break; 
+            }
 
-    void BuildMaze()
-    {
-        GameObject target = Instantiate(targetObject, Vector3.zero, Quaternion.identity);
+            // Rastgele bir küp seç ve onu soy
+            int rndIndex = Random.Range(0, candidates.Count);
+            Vector3Int chosenCell = candidates[rndIndex];
+            List<Vector3> dirs = candidateDirs[rndIndex];
+            Vector3 chosenDir = dirs[Random.Range(0, dirs.Count)];
 
+            escapeDirections[chosenCell.x, chosenCell.y, chosenCell.z] = chosenDir;
+            grid[chosenCell.x, chosenCell.y, chosenCell.z] = false;
+            remainingCubes--;
+        }
+
+        // 3. Hesaplanan yönlerle küpleri sahnede oluştur
         for (int x = 0; x < mazeWidth; x++)
         {
             for (int y = 0; y < mazeHeight; y++)
             {
                 for (int z = 0; z < mazeDepth; z++)
                 {
-                    if (maze[x, y, z] == 1)
+                    Vector3 escDir = escapeDirections[x, y, z];
+                    if (escDir != Vector3.zero)
                     {
-                        // Rastgele bir küp prefabı seçmek için:
                         int randomIndex = Random.Range(0, selectedCubePrefabs.Length);
-                        GameObject cube = Instantiate(selectedCubePrefabs[randomIndex], new Vector3(x, y, z), Quaternion.identity);
-                        cube.transform.parent = target.transform;
-                        mazeObjects.Add(cube); // Oluşturulan her objeyi listeye ekle
+                        GameObject prefab = selectedCubePrefabs[randomIndex];
+                        
+                        ObjectMovement mov = prefab.GetComponent<ObjectMovement>();
+                        Vector3 localMoveDir = mov != null ? mov.moveDirection : Vector3.forward;
+                        if(localMoveDir == Vector3.zero) localMoveDir = Vector3.forward;
+
+                        // Küpün lokal yönünü (ok işareti) hesaplanan kaçış yönüne çevir
+                        Quaternion rotation = Quaternion.FromToRotation(localMoveDir, escDir);
+                        
+                        // İsteğe bağlı rastgele çevirme: Ok yönünü bozmadan küpü sağa sola çevirebiliriz
+                        // Quaternion twist = Quaternion.AngleAxis(Random.Range(0, 4) * 90f, escDir);
+                        // rotation = twist * rotation;
+
+                        GameObject cube = Instantiate(prefab, new Vector3(x, y, z), rotation);
+                        if (target != null) cube.transform.parent = target.transform;
+                        else cube.transform.parent = this.transform;
+
+                        mazeObjects.Add(cube);
                     }
                 }
             }
         }
     }
 
+    // Bir pozisyondan dışarı çıkabilen yönlerin (önünde engel olmayanların) listesini döner
+    List<Vector3> GetFreeDirections(bool[,,] grid, int cx, int cy, int cz)
+    {
+        List<Vector3> freeDirs = new List<Vector3>();
+        Vector3Int[] directions = new Vector3Int[]
+        {
+            Vector3Int.right, Vector3Int.left,
+            Vector3Int.up, Vector3Int.down,
+            new Vector3Int(0, 0, 1), // forward
+            new Vector3Int(0, 0, -1) // back
+        };
+
+        foreach (var dir in directions)
+        {
+            bool isFree = true;
+            int nx = cx + dir.x;
+            int ny = cy + dir.y;
+            int nz = cz + dir.z;
+            
+            while (nx >= 0 && nx < mazeWidth && ny >= 0 && ny < mazeHeight && nz >= 0 && nz < mazeDepth)
+            {
+                if (grid[nx, ny, nz])
+                {
+                    isFree = false; // Önünde başka bir küp var
+                    break;
+                }
+                nx += dir.x;
+                ny += dir.y;
+                nz += dir.z;
+            }
+            
+            if (isFree) freeDirs.Add(new Vector3((float)dir.x, (float)dir.y, (float)dir.z));
+        }
+        return freeDirs;
+    }
+
     public int GetObjectCount()
     {
-        // Dizinin eleman sayısını Debug.Log ile yazdırma
-        Debug.Log("Maze Object Count: " + mazeObjects.Count);
+        Debug.Log("Block Object Count: " + mazeObjects.Count);
         return mazeObjects.Count;
     }
 
-    public void RemoveRandomObjects(int count)
-    {
-        // Silinecek obje sayısını kontrol et
-        if (count <= 0)
-        {
-            Debug.LogWarning("Count should be greater than 0.");
-            return;
-        }
-
-        // Silinecek obje sayısı, mevcut obje sayısından fazla olamaz
-        if (count > mazeObjects.Count)
-        {
-            Debug.LogWarning("Count should be less than or equal to the total number of objects.");
-            return;
-        }
-
-        // Belirtilen sayıda rastgele objeyi sil
-        for (int i = 0; i < count; i++)
-        {
-            // Silinecek objeyi rastgele seç
-            int randomIndex = Random.Range(0, mazeObjects.Count);
-            GameObject objectToRemove = mazeObjects[randomIndex];
-
-            // Seçilen objeyi listeden ve sahneden kaldır
-            mazeObjects.RemoveAt(randomIndex);
-            Destroy(objectToRemove);
-        }
-
-        Debug.Log(count + " random objects removed.");
-    }
-
-    // Ek olarak, bu yöntemi çağırarak tüm objeleri elde edebilirsiniz
     public GameObject[] GetAllObjectsInMaze()
     {
         return mazeObjects.ToArray();
