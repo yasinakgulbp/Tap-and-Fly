@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Unity IL2CPP output is generated, not hand-written game source.
+apk/**/il2cppOutput/** linguist-generated=true
